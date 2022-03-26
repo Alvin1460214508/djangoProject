@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'app001.apps.App001Config'
 ]
 
 MIDDLEWARE = [
@@ -53,8 +54,9 @@ ROOT_URLCONF = 'djangoProject.urls'
 
 TEMPLATES = [
     {
+        # DIRS里写了BASE_DIR就会从根目录开始找templates模板
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
+        'DIRS': [BASE_DIR / 'app001/templates']
         ,
         'APP_DIRS': True,
         'OPTIONS': {

@@ -15,9 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from app001 import views
 
 # url和函数的对应关系
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # path('admin/', admin.site.urls),
+    path('index/', views.index),
+    path('user/list', views.userlist)
 ]
