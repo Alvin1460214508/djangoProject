@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>模板语法的学习，双括号是重点</title>
+</head>
+<body>
+    <h1>模板语法的学习</h1>
+    <div>{{ n1 }}</div>
+    <div>{{ n2.0 }}</div>  <!--获取列表中的某个元素用.-->
+    <div>
+        {% for item in n2 %}
+            <span>{{ item }}</span>  <!--循环展示列表-->
+        {% endfor %}
+    </div>
+    <hr/>   <!--一条横线-->
+    <div>
+        {{ n3 }}
+        {{ n3.name }}
+        {{ n3.salary }}
+        {{ n3.role }}
+    </div>
+    <ul>
+        {% for k,v in n3.items %}   <!--keys,values获取键和值-->
+            <li>{{ k }} = {{ v }}</li>
+        {% endfor %}
+    </ul>
+    <hr/>
+    <div>
+        {{ n4.2 }}
+        {{ n4.3.name }}
+    </div>
+    {% for item in n4 %}   <!--keys,values获取键和值-->
+        <li>{{ item.name }} = {{ item.salary }}</li>
+    {% endfor %}
+
+    <!--条件语句-->
+    {% if n1 == "jieke" %}
+        <h1>hhhhh</h1>
+    {% elif n1 == "jie" %}
+        <h1>huhuhu</h1>
+    {% else %}
+        <h1>wwwww</h1>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理页面</title>
+</head>
+<body>
+<h1>INFO列表</h1>
+<a href="/info/add">添加用户</a>
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>姓名</th>
+            <th>密码</th>
+            <th>年龄</th>
+            <th>时间</th>
+        </tr>
+    </thead>
+    <tbody>
+    <!--用双括号获取替代符号，从数据库中取得数据-->
+    {% for obj in info_list %}
+        <tr>
+            <td>{{ obj.id }}</td>
+            <td>{{ obj.name }}</td>
+            <td>{{ obj.password }}</td>
+            <td>{{ obj.age }}</td>
+
+            <!--注意时间的表示方法-->
+            <td>{{ obj.event_date|date:"Y-m-d H:i:s" }}</td>
+
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

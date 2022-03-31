@@ -20,7 +20,27 @@ from app001 import views
 # url和函数的对应关系
 
 urlpatterns = [
-    # path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
+
+    # 测试
     path('index/', views.index),
-    path('user/list', views.userlist)
+    path('user/list', views.userlist),
+    path('tpl/', views.tpl),
+
+    # 请求与响应
+    path('news/', views.news),
+    path('some/', views.something),
+
+    # 案例——用户登录
+    path('login/', views.login),
+
+    # 数据库操作
+    path('orm/', views.orm_test),
+
+    # 案例——用户管理
+    path('info/list', views.info_list),  # 展示用户列表
+    path('info/add', views.info_add),    # 添加用户
+    path('dikwp/crud', views.dikwp),
+    path('dikwp/searchnodes', views.searfind_nodes),
+    path('dikwp/searchships', views.searfind_ships),
 ]
