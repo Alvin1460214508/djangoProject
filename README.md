@@ -134,3 +134,8 @@ Python Neomodel
     jim.delete()
     jim.refresh() # reload properties from the database  删除之后不能刷新
     jim.id # neo4j internal id内部ID
+
+在建好models之后运行
+
+
+    python.exe manage.py install_labels

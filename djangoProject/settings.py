@@ -43,12 +43,14 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'djangoProject.urls'
 
@@ -56,8 +58,8 @@ TEMPLATES = [
     {
         # DIRS里写了BASE_DIR就会从根目录开始找templates模板
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'app001/templates']
-        ,
+        # 'DIRS': [BASE_DIR / 'app001/templates'],
+        'DIRS': [os.path.join(BASE_DIR, 'appfront/dist')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -68,6 +70,11 @@ TEMPLATES = [
             ],
         },
     },
+]
+
+# 用于Vue.js
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'appfront/dist/static'),
 ]
 
 WSGI_APPLICATION = 'djangoProject.wsgi.application'

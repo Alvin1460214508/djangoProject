@@ -1,5 +1,15 @@
+from __future__ import unicode_literals
 from django.shortcuts import render, HttpResponse, redirect
+
 from app001 import models
+
+
+import json
+from django.http import JsonResponse
+from django.core import serializers
+from django.shortcuts import render
+from django.views.decorators.http import require_http_methods
+
 
 # neo4j的import
 import logging
@@ -8,7 +18,7 @@ import sys
 from neo4j import GraphDatabase
 from neo4j.exceptions import ServiceUnavailable
 
-from app001.models import Person, Country
+from app001.models import Person, Country, Book
 
 '''写函数'''
 
@@ -181,77 +191,110 @@ def dikwp(request):
 
 
 def searfind_nodes(request):
-    # Return all nodes
-    all_nodes = Person.nodes.all()
 
-    print(all_nodes)
+    # # Return all nodes
+    # all_nodes = Person.nodes.all()
+    #
+    # print(all_nodes)
+    #
+    # # Returns Person by Person.name=='Jim' or raises neomodel.DoesNotExist if no match
+    # jim = Person.nodes.get(name='Jim')
+    # print(jim.age)
+    #
+    # # Will return None unless "bob" exists
+    # someone = Person.nodes.get_or_none(name='bob')
+    #
+    # print("Bob is {0}".format(someone))
+    #
+    # # Will return the first Person node with the name bob. This raises neomodel.DoesNotExist if there's no match.
+    # """someone = Person.nodes.first(name='bob')
+    # print("first Bob is {0}", someone)"""
+    # # Will return the first Person node with the name bob or None if there's no match
+    # someone = Person.nodes.first_or_none(name='bob')
+    # print("first none Bob is {0}".format(someone))
+    # # Return set of nodes
+    # # 双下划线之后再跟gt表示大于
+    # people = Person.nodes.filter(age__gt=3)
+    # # 条件查找特定的nodes
+    # print("people is {0}".format(people))
 
-    # Returns Person by Person.name=='Jim' or raises neomodel.DoesNotExist if no match
-    jim = Person.nodes.get(name='Jim')
-    print(jim.age)
-
-    # Will return None unless "bob" exists
-    someone = Person.nodes.get_or_none(name='bob')
-
-    print("Bob is {0}".format(someone))
-
-    # Will return the first Person node with the name bob. This raises neomodel.DoesNotExist if there's no match.
-    """someone = Person.nodes.first(name='bob')
-    print("first Bob is {0}", someone)"""
-    # Will return the first Person node with the name bob or None if there's no match
-    someone = Person.nodes.first_or_none(name='bob')
-    print("first none Bob is {0}".format(someone))
-    # Return set of nodes
-    # 双下划线之后再跟gt表示大于
-    people = Person.nodes.filter(age__gt=3)
-    # 条件查找特定的nodes
-    print("people is {0}".format(people))
-
-    return HttpResponse('OK')
+    return HttpResponse('find_nodes OK')
 
 
 def searfind_ships(request):
 
-    # 查询两个节点并提取
-    # germany = Country(code='DE').save()
-    germany = Country.nodes.get(code='DE')
-    jim = Person.nodes.get(name='Jim')
-
+    # # 查询两个节点并提取
+    # # germany = Country(code='DE').save()
+    # germany = Country.nodes.get(code='DE')
+    # jim = Person.nodes.get(name='Jim')
+    #
+    # # jim.country.connect(germany)
+    #
+    # # 看看两个节点之间有没有关系
+    # if jim.country.is_connected(germany):
+    #     print("Jim's from Germany")
+    #
+    # # 遍历德国这个节点，看看有哪些个人是德国人
+    # for p in germany.inhabitant.all():
+    #     print(p.name)  # Jim
+    #
+    # # 数数看有多少个人是德国人
+    # countger = len(germany.inhabitant)  # 1
+    # print(countger)
+    #
+    # # 找到一个叫jim的德国人
+    # # Find people called 'Jim' in germany
+    # if germany.inhabitant.search(name='Jim'):
+    #     print("There is a Jim who comes from germany")
+    #
+    # # 找到所有叫jim的德国人
+    # # Find all the people called in germany except 'Jim'
+    # if germany.inhabitant.exclude(name='Jim'):
+    #     print("Many Jim are germany")
+    #
+    # # Remove Jim's country relationship with Germany
+    # jim.country
+    # usa = Country(code='US').save()
+    # jim.country.connect(usa)
     # jim.country.connect(germany)
+    #
+    # # Remove all of Jim's country relationships
+    # jim.country.disconnect_all()
+    #
+    # jim.country.connect(usa)
+    # # Replace Jim's country relationship with a new one
+    # jim.country.replace(germany)
 
-    # 看看两个节点之间有没有关系
-    if jim.country.is_connected(germany):
-        print("Jim's from Germany")
+    return HttpResponse('find_relationship OK')
 
-    # 遍历德国这个节点，看看有哪些个人是德国人
-    for p in germany.inhabitant.all():
-        print(p.name)  # Jim
 
-    # 数数看有多少个人是德国人
-    countger = len(germany.inhabitant)  # 1
-    print(countger)
+# add_book接受一个get请求，往数据库里添加一条book数据
+@require_http_methods(["GET"])
+def add_book(request):
+    response = {}
+    try:
+        book = Book(book_name=request.GET.get('book_name'))
+        book.save()
+        response['msg'] = 'success'
+        response['error_num'] = 0
+    except Exception as e:
+        response['msg'] = str(e)
+        response['error_num'] = 1
 
-    # 找到一个叫jim的德国人
-    # Find people called 'Jim' in germany
-    if germany.inhabitant.search(name='Jim'):
-        print("There is a Jim who comes from germany")
+    return JsonResponse(response)
 
-    # 找到所有叫jim的德国人
-    # Find all the people called in germany except 'Jim'
-    if germany.inhabitant.exclude(name='Jim'):
-        print("Many Jim are germany")
 
-    # Remove Jim's country relationship with Germany
-    jim.country
-    usa = Country(code='US').save()
-    jim.country.connect(usa)
-    jim.country.connect(germany)
+# show_books返回所有的书籍列表（通过JsonResponse返回能被前端识别的json格式数据）
+@require_http_methods(["GET"])
+def show_books(request):
+    response = {}
+    try:
+        books = Book.objects.filter()
+        response['list'] = json.loads(serializers.serialize("json", books))
+        response['msg'] = 'success'
+        response['error_num'] = 0
+    except Exception as e:
+        response['msg'] = str(e)
+        response['error_num'] = 1
 
-    # Remove all of Jim's country relationships
-    jim.country.disconnect_all()
-
-    jim.country.connect(usa)
-    # Replace Jim's country relationship with a new one
-    jim.country.replace(germany)
-
-    return HttpResponse('relationship OK')
+    return JsonResponse(response)

@@ -15,6 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.views.generic import TemplateView
+
 from app001 import views
 
 # url和函数的对应关系
@@ -43,4 +45,9 @@ urlpatterns = [
     path('dikwp/crud', views.dikwp),
     path('dikwp/searchnodes', views.searfind_nodes),
     path('dikwp/searchships', views.searfind_ships),
+
+    # Vue测试
+    path('add_book/', views.add_book),
+    path('show_books/', views.show_books),
+    path('vue/', TemplateView.as_view(template_name="index.html")),
 ]
