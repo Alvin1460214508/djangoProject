@@ -46,6 +46,7 @@ class Country(StructuredNode):
         pass
 
     code = StringProperty(unique_index=True, required=True)
+    countryName = StringProperty(required=True)
 
 
 class Person(StructuredNode):

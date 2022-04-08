@@ -101,7 +101,7 @@ DATABASES = {
 
 }
 
-config.DATABASE_URL = 'bolt://neo4j:123456@localhost:7687/dikwp'  # default
+config.DATABASE_URL = 'bolt://neo4j:dikwp@localhost:7687/dikwp'  # default
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators

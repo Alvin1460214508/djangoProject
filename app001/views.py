@@ -190,6 +190,24 @@ def dikwp(request):
     return HttpResponse("dikwp增删改查测试")
 
 
+def dikwpships(request):
+    jackWang = Person(name='Jack', age=33)
+    American = Country(code='US', countryName='American')
+    jackWang.save()
+    American.save()
+    jackWang.country.connect(American)
+    littleT = Person.nodes.get(name='tim')
+    littleT.country.connect(American)
+
+    if jackWang.country.is_connected(American):
+        print("Jack's from American")
+
+    if littleT.country.is_connected(American):
+        print("tim's from American")
+
+    return HttpResponse("关系的链接")
+
+
 def searfind_nodes(request):
 
     # # Return all nodes

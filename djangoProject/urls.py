@@ -42,7 +42,10 @@ urlpatterns = [
     # 案例——用户管理
     path('info/list', views.info_list),  # 展示用户列表
     path('info/add', views.info_add),    # 添加用户
+
+
     path('dikwp/crud', views.dikwp),
+    path('dikwp/ships', views.dikwpships),
     path('dikwp/searchnodes', views.searfind_nodes),
     path('dikwp/searchships', views.searfind_ships),
 
