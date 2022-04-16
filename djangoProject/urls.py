@@ -46,11 +46,23 @@ urlpatterns = [
 
     path('dikwp/crud', views.dikwp),
     path('dikwp/ships', views.dikwpships),
-    path('dikwp/searchnodes', views.searfind_nodes),
-    path('dikwp/searchships', views.searfind_ships),
+    path('dikwp/searchnodes', views.searchFindNodes),
+    path('dikwp/searchships', views.searchFindShips),
 
     # Vue测试
     path('add_book/', views.add_book),
     path('show_books/', views.show_books),
     path('vue/', TemplateView.as_view(template_name="index.html")),
+
+    # neomodel_CURD
+    path('add_person/', views.addPerson),
+    path('add_movie/', views.addMovie),
+    path('show_person/', views.show_person),
+    path('show_movie/', views.show_movie),
+    path('show_specific_person/', views.showSpecificPerson),
+    path('show_specific_movie/', views.showSpecificMovie),
+    path('isconnect/', views.oneConnectAnother),
+    path('delete_person/', views.deletePerson),
+    path('delete_movie/', views.deleteMovie),
+    path('delete_country/', views.deleteCountry),
 ]

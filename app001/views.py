@@ -1,15 +1,15 @@
 from __future__ import unicode_literals
 from django.shortcuts import render, HttpResponse, redirect
 
-from app001 import models
+from django.db import transaction
 
+from app001 import models
 
 import json
 from django.http import JsonResponse
 from django.core import serializers
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
-
 
 # neo4j的import
 import logging
@@ -18,21 +18,24 @@ import sys
 from neo4j import GraphDatabase
 from neo4j.exceptions import ServiceUnavailable
 
-from app001.models import Person, Country, Book
+from app001.models import Person, Country, Book, Movie
 
 '''写函数'''
 
 
 # Create your views here.
+# 初始学习网页
 def index(request):
     return HttpResponse("欢迎使用")
 
 
+# render返回一个网页
 def userlist(request):
     # 根据app的注册顺序，逐一在其templates文件夹中找对应的文件
     return render(request, "user_list.html")
 
 
+# render返回一个网页，附带参数
 def tpl(request):
     name = "jieke"
     roles = ["guanliyaun", "CO"]  # 列表，不分顺序
@@ -46,6 +49,7 @@ def tpl(request):
     return render(request, 'tpl.html', {"n1": name, "n2": roles, "n3": user_info, "n4": data_list})
 
 
+# 向第三方网站请求数据（当前链接失效）
 def news(request):
     # 可以用字典列表等定义新闻发出
     # 也可以向第三方网站发请求
@@ -57,6 +61,7 @@ def news(request):
     return render(request, 'news.html')
 
 
+# GET POST 重定向传值
 def something(request):
     """请求"""
     # 获取请求的方式有GET/POST
@@ -79,6 +84,7 @@ def something(request):
     return redirect("https://www.chinaunicom.com/news/list202201.html")
 
 
+# 登录验证密码
 def login(request):
     if request.method == "GET":
         return render(request, "login.html")
@@ -102,6 +108,7 @@ def login(request):
     return render(request, 'login.html', {"error_msg": "用户名或密码错误"})
 
 
+# django操作mysql数据
 def orm_test(request):
     # 测试ORM操作表格数据
 
@@ -176,29 +183,73 @@ def info_add(request):
     return redirect("/info/list")
 
 
+"""Neo4j操作"""
+
+
+# Neo4j测试
 def neo_crud(request):
     return HttpResponse("OK")
 
 
+# 节点操作——增删改查测试
 def dikwp(request):
-    tim = Person(name='tim', age=3).save()  # Create
-    tim.age = 4
-    tim.save()  # Update, (with validation)
-    # tim.delete()
-    tim.refresh()  # reload properties from the database
-    print(tim.uid)  # neo4j internal id
-    return HttpResponse("dikwp增删改查测试")
+    """创建sam"""
+    """
+    sam = Person(
+        name='sam',
+        age=23,
+        people="汉族",
+        sex='M',
+        likes=['play football', 'read book', "玩桌游"],
+        dislikes=["早起", 'practise']
+    ) 
+    sam.save()
+    sam.country.connect(Country.nodes.get(code='US'))
+    """
+    try:
+        if Person.nodes.get(name='tim'):
+            # 获取节点
+            tim = Person.nodes.get(name='tim')
+
+            # 更新节点
+            tim.age = 23
+            tim.people = "汉族"
+            tim.sex = 'M'
+            tim.likes = ['play football', 'read book', "玩桌游"],
+            tim.dislikes = ["早起", 'practise']
+
+            # 保存节点
+            tim.save()
+
+            # 刷新节点
+            tim.refresh()
+
+            # 验证、操作节点
+            print(tim.sex)
+    # except Exception as es:
+    #     print("youle")
+    finally:
+        return HttpResponse("节点操作有问题")
+
+    return HttpResponse("Neo4j的增删改查测试完成")
 
 
+# 节点间关系的操作
 def dikwpships(request):
+    # 获取、创建节点
     jackWang = Person(name='Jack', age=33)
     American = Country(code='US', countryName='American')
+    littleT = Person.nodes.get(name='tim')
+
+    # 保存、更新节点
     jackWang.save()
     American.save()
+
+    # 创建节点间关系实例
     jackWang.country.connect(American)
-    littleT = Person.nodes.get(name='tim')
     littleT.country.connect(American)
 
+    # 验证关系操作
     if jackWang.country.is_connected(American):
         print("Jack's from American")
 
@@ -208,8 +259,8 @@ def dikwpships(request):
     return HttpResponse("关系的链接")
 
 
-def searfind_nodes(request):
-
+# 查找节点
+def searchFindNodes(request):
     # # Return all nodes
     # all_nodes = Person.nodes.all()
     #
@@ -239,8 +290,8 @@ def searfind_nodes(request):
     return HttpResponse('find_nodes OK')
 
 
-def searfind_ships(request):
-
+# 查找关系
+def searchFindShips(request):
     # # 查询两个节点并提取
     # # germany = Country(code='DE').save()
     # germany = Country.nodes.get(code='DE')
@@ -286,13 +337,21 @@ def searfind_ships(request):
     return HttpResponse('find_relationship OK')
 
 
-# add_book接受一个get请求，往数据库里添加一条book数据
-@require_http_methods(["GET"])
-def add_book(request):
+# addPerson接受一个post请求，往数据库里添加一条person数据
+@require_http_methods(["POST"])
+def addPerson(request):
     response = {}
     try:
-        book = Book(book_name=request.GET.get('book_name'))
-        book.save()
+        someone = Person(
+            name=request.POST.get('book_name'),
+            age=request.POST.get('book_name'),
+            people=request.POST.get('book_name'),
+            sex=request.POST.get('book_name'),
+            likes=request.POST.get(''),
+            dislikes=request.POST.get('')
+        )
+        someone.save()
+        someone.country.connect(request.POST.get('country'))
         response['msg'] = 'success'
         response['error_num'] = 0
     except Exception as e:
@@ -302,6 +361,189 @@ def add_book(request):
     return JsonResponse(response)
 
 
+# addCountry接受一个post请求，往数据库里添加一条country数据
+@require_http_methods(["POST"])
+def addCountry(request):
+    response = {}
+    try:
+        oneCountry = Country(
+            code=request.POST.get('book_name'),
+            countryName=request.POST.get('book_name')
+        )
+        oneCountry.save()
+        response['msg'] = 'success'
+        response['error_num'] = 0
+    except Exception as e:
+        response['msg'] = str(e)
+        response['error_num'] = 1
+
+    return JsonResponse(response)
+
+
+# addMovie接受一个post请求，往数据库里添加一条movie数据
+@require_http_methods(["POST"])
+def addMovie(request):
+    response = {}
+    try:
+        oneMovie = Movie(
+            title=request.POST.get('book_name'),
+            releasedTime=request.POST.get('book_name'),
+            tags=request.POST.get('book_name'),
+            score=request.POST.get('book_name'),
+        )
+        oneMovie.save()
+        oneMovie.actors.connect(request.POST.get('actors'), {'isLeader': request.POST.get('isLeader')})
+        oneMovie.director.connect(request.POST.get('director'))
+        oneMovie.writer.connect(request.POST.get('writer'))
+        oneMovie.producer.connect(request.POST.get('producer'))
+        oneMovie.country.connect(request.POST.get('country'))
+        response['msg'] = 'success'
+        response['error_num'] = 0
+    except Exception as e:
+        response['msg'] = str(e)
+        response['error_num'] = 1
+
+    return JsonResponse(response)
+
+
+# 查找所有的人物信息（通过JsonResponse返回能被前端识别的json格式数据）
+@require_http_methods(["GET"])
+def show_person(request):
+    response = {}
+    try:
+        persons = Person.nodes.all()
+        response['list'] = json.loads(serializers.serialize("json", persons))
+        response['msg'] = 'success'
+        response['error_num'] = 0
+    except Exception as e:
+        response['msg'] = str(e)
+        response['error_num'] = 1
+
+    return JsonResponse(response)
+
+
+# 查找所有的电影信息（通过JsonResponse返回能被前端识别的json格式数据）
+@require_http_methods(["GET"])
+def show_movie(request):
+    response = {}
+    try:
+        movies = Movie.nodes.all()
+        response['list'] = json.loads(serializers.serialize("json", movies))
+        response['msg'] = 'success'
+        response['error_num'] = 0
+    except Exception as e:
+        response['msg'] = str(e)
+        response['error_num'] = 1
+
+    return JsonResponse(response)
+
+
+# 查找特定的人物具体信息（通过JsonResponse返回能被前端识别的json格式数据）
+@require_http_methods(["GET"])
+def showSpecificPerson(request):
+    response = {}
+    try:
+        certainOne = Person.nodes.get_or_none(name=request.GET.get('name'))
+        response['list'] = json.loads(serializers.serialize("json", certainOne))
+        response['msg'] = 'success'
+        response['error_num'] = 0
+    except Exception as e:
+        response['msg'] = str(e)
+        response['error_num'] = 1
+
+    return JsonResponse(response)
+
+
+# 查找特定的电影具体信息（通过JsonResponse返回能被前端识别的json格式数据）
+@require_http_methods(["GET"])
+def showSpecificMovie(request):
+    response = {}
+    try:
+        certainMovie = Person.nodes.get_or_none(title=request.GET.get('title'))
+        response['list'] = json.loads(serializers.serialize("json", certainMovie))
+        response['msg'] = 'success'
+        response['error_num'] = 0
+    except Exception as e:
+        response['msg'] = str(e)
+        response['error_num'] = 1
+
+    return JsonResponse(response)
+
+
+# 比较电影和人之间的关系（通过JsonResponse返回能被前端识别的json格式数据）
+@require_http_methods(["GET"])
+def oneConnectAnother(request):
+    response = {}
+    try:
+        one = Person.GET.get(name=request.GET.get('person_name'))
+        another = Movie.GET.get(name=request.GET.get('movie_name'))
+        response['isActor'] = another.actors.is_connected(one)
+        response['isDirector'] = another.director.is_connected(one)
+        response['isWriter'] = another.writer.is_connected(one)
+        response['isProducer'] = another.producer.is_connected(one)
+        response['msg'] = 'success'
+        response['error_num'] = 0
+    except Exception as e:
+        response['msg'] = str(e)
+        response['error_num'] = 1
+
+    return JsonResponse(response)
+
+
+# 删除特定的人（通过JsonResponse返回能被前端识别的json格式数据）
+@require_http_methods(["GET"])
+def deletePerson(request):
+    response = {}
+    try:
+        certainOne = Person.nodes.get_or_none(name=request.GET.get('name'))
+        certainOne.delete()
+        certainOne.save()
+        response['msg'] = 'success'
+        response['error_num'] = 0
+    except Exception as e:
+        response['msg'] = str(e)
+        response['error_num'] = 1
+
+    return JsonResponse(response)
+
+
+# 删除特定的电影（通过JsonResponse返回能被前端识别的json格式数据）
+@require_http_methods(["GET"])
+def deleteMovie(request):
+    response = {}
+    try:
+        certainMovie = Movie.nodes.get_or_none(title=request.GET.get('title'))
+        certainMovie.delete()
+        certainMovie.save()
+        response['msg'] = 'success'
+        response['error_num'] = 0
+    except Exception as e:
+        response['msg'] = str(e)
+        response['error_num'] = 1
+
+    return JsonResponse(response)
+
+
+# 删除特定的国家（通过JsonResponse返回能被前端识别的json格式数据）
+@require_http_methods(["GET"])
+def deleteCountry(request):
+    response = {}
+    try:
+        certainCountry = Country.nodes.get_or_none(countryName=request.GET.get('countryName'))
+        certainCountry.delete()
+        certainCountry.save()
+        response['msg'] = 'success'
+        response['error_num'] = 0
+    except Exception as e:
+        response['msg'] = str(e)
+        response['error_num'] = 1
+
+    return JsonResponse(response)
+
+
+"""测试用添加查找书籍"""
+
+
 # show_books返回所有的书籍列表（通过JsonResponse返回能被前端识别的json格式数据）
 @require_http_methods(["GET"])
 def show_books(request):
@@ -309,6 +551,22 @@ def show_books(request):
     try:
         books = Book.objects.filter()
         response['list'] = json.loads(serializers.serialize("json", books))
+        response['msg'] = 'success'
+        response['error_num'] = 0
+    except Exception as e:
+        response['msg'] = str(e)
+        response['error_num'] = 1
+
+    return JsonResponse(response)
+
+
+# add_book接受一个get请求，往数据库里添加一条book数据
+@require_http_methods(["GET"])
+def add_book(request):
+    response = {}
+    try:
+        book = Book(book_name=request.GET.get('book_name'))
+        book.save()
         response['msg'] = 'success'
         response['error_num'] = 0
     except Exception as e:

@@ -1,5 +1,8 @@
 from django.db import models
-from neomodel import (StructuredNode, StringProperty, IntegerProperty, UniqueIdProperty, RelationshipTo)
+# from neomodel import (StructuredNode, StringProperty, IntegerProperty, UniqueIdProperty, RelationshipTo,
+#                       DateTimeFormatProperty, ArrayProperty, StructuredRel)
+
+from neomodel import *
 
 '''操作数据库'''
 
@@ -16,9 +19,6 @@ class Book(models.Model):
 
     def __unicode__(self):
         return self.book_name
-
-
-"""Neo4j"""
 
 
 class UserInfo(models.Model):
@@ -40,6 +40,9 @@ class Department(models.Model):
     title = models.CharField(max_length=16)
 
 
+"""Neo4j"""
+
+
 class Country(StructuredNode):
     @classmethod
     def category(cls):
@@ -58,5 +61,37 @@ class Person(StructuredNode):
     name = StringProperty(unique_index=True)
     age = IntegerProperty(index=True, default=0)
     people = StringProperty()
+    # 性别
+    SEXES = {'M': 'Man', 'W': 'Woman', 'O': 'Other'}
+    sex = StringProperty(required=True, choices=SEXES)
+    # 喜好
+    likes = ArrayProperty(StringProperty())
+    dislikes = ArrayProperty(StringProperty())
+    # 关系
     # traverse outgoing IS_FROM relations, inflate to Country objects
+    country = RelationshipTo(Country, 'IS_FROM')
+
+
+class ActedInRel(StructuredRel):
+    actorType = {'0': '主角', '1': "配角"}
+    isLeader = StringProperty(required=True, choices=actorType)
+
+
+class Movie(StructuredNode):
+    @classmethod
+    def category(cls):
+        pass
+
+    mid = UniqueIdProperty()
+    title = StringProperty(required=True)
+    releasedTime = DateTimeFormatProperty(format="%Y-%m")
+    tags = ArrayProperty(StringProperty(), required=True)
+    score = IntegerProperty()
+
+    # 关系
+    actors = RelationshipFrom(Person, 'Acted_In', model=ActedInRel)
+    director = RelationshipFrom(Person, 'Directed_In')
+    writer = RelationshipFrom(Person, 'WROTE')
+    producer = RelationshipFrom(Person, 'Produce')
+
     country = RelationshipTo(Country, 'IS_FROM')
